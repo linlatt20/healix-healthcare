@@ -1,83 +1,141 @@
 # Healix — Care Without Borders
 
-외국인 환자를 위한 다국어 헬스케어 앱 (ASVF 2026, Team 1).
-Replit에서 내보낸 코드를 **VS Code + 로컬 개발 환경**에서 돌아가도록 다시 구성한 버전입니다.
+## Introduction
 
-## 구조
+**Healix** is a multilingual healthcare companion for foreigners living in Korea.
+Language barriers, an unfamiliar insurance system and not knowing where to go make
+seeing a doctor in a new country stressful. Healix brings everything a foreign
+patient needs into one place: AI symptom guidance, medical translation,
+English-friendly clinic search and booking, insurance cost estimates and a
+community of people in the same situation.
+
+Built by Team 1 for **ASVF 2026**. The project includes a web app, an iOS/Android
+app and a shared API server.
+
+## Features
+
+- **AI health chatbot**: describe symptoms in your own language and get guidance on what kind of care you may need and which department to visit.
+- **Medical translation**: translate medical text between languages, or take a photo of a prescription or medical document and have it translated.
+- **Clinic search and AI recommendation**: find clinics by department and spoken language, get AI-recommended clinics for your symptoms, and book an appointment with available time slots shown.
+- **Medical interpreter booking**: browse interpreters and book, edit or cancel an interpreter session.
+- **Insurance guide and cost calculator**: learn how Korea's National Health Insurance (NHIS) works and estimate your out-of-pocket cost by insurance type and type of medical facility.
+- **Personal health record**: store allergies, medications and conditions, and keep a log of past clinic visits.
+- **Community**: ask questions, share experiences and comment on posts from other foreign residents.
+- **Google sign-in**: sign in with a Google account. Sessions are stored in the database.
+
+## Tech Stack
+
+| Area | Technologies |
+|---|---|
+| Web | React 19, Vite 7, Tailwind CSS v4, Radix UI (shadcn/ui), TanStack Query, wouter, Framer Motion |
+| Mobile | Expo SDK 54, React Native 0.81, expo-router |
+| API server | Node.js, Express 5, TypeScript, tsx, pino |
+| Database | PostgreSQL, Drizzle ORM, drizzle-kit |
+| AI | OpenAI API (GPT-5 mini, GPT-4o mini for image translation) |
+| Auth | Google OpenID Connect (`openid-client`), cookie / bearer-token sessions |
+| Validation | zod |
+| Tooling | pnpm workspaces (monorepo), TypeScript 5.8 |
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js** 20.19 or later (22 recommended)
+- **pnpm** 10: run `corepack enable`, or prefix every command below with `npx pnpm@10.15.0` instead of installing it
+- **PostgreSQL**: a local install, Docker, or a free hosted database (Supabase, Neon, etc.)
+- An **OpenAI API key** and a **Google OAuth client** (for sign-in)
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/<your-account>/healix.git
+cd healix
+pnpm install
+```
+
+For the mobile app, also align Expo package versions once:
+
+```bash
+cd apps/mobile && pnpm fix-deps && cd ../..
+```
+
+### 2. Configure environment variables
+
+```bash
+cp .env.example .env                          # Windows: copy .env.example .env
+cp apps/mobile/.env.example apps/mobile/.env
+```
+
+Fill in `.env`:
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `OPENAI_API_KEY` | OpenAI API key (required: the server does not start without it) |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google OAuth client credentials |
+| `WEB_ORIGIN` | Allowed web origins for CORS (default `http://localhost:5173`) |
+| `PORT` | API server port (default `3001`) |
+
+**Google sign-in setup:** in Google Cloud Console, go to *APIs & Services → Credentials →
+Create OAuth client ID (Web application)* and add
+`http://localhost:5173/api/callback` as an authorized redirect URI.
+
+### 3. Create the database tables
+
+```bash
+pnpm db:push
+```
+
+Sample clinics and community posts are inserted automatically the first time the server starts.
+
+### 4. Run
+
+| What | Command | URL |
+|---|---|---|
+| API + web together | `pnpm dev` | http://localhost:5173 |
+| API only | `pnpm dev:api` | http://localhost:3001/api/healthz |
+| Web only | `pnpm dev:web` | http://localhost:5173 |
+| Mobile | `pnpm dev:mobile` | Scan the QR code with Expo Go |
+| Type check | `pnpm typecheck` | |
+
+The web dev server forwards `/api/*` requests to the API server.
+To test on a phone, set `EXPO_PUBLIC_API_URL` in `apps/mobile/.env` to your
+computer's LAN IP (e.g. `http://192.168.0.10:3001`).
+
+**VS Code users:** the `.vscode/` folder includes recommended extensions, tasks
+(*Ctrl+Shift+P → Tasks: Run Task*) and a debug configuration for the API.
+`api.http` lets you try the API with the REST Client extension.
+
+## Project Structure
 
 ```
 healix/
 ├─ apps/
-│  ├─ api/        Express + OpenAI + Google 로그인 (포트 3001)
-│  ├─ web/        React + Vite + Tailwind v4 (포트 5173, /api → 3001 프록시)
-│  └─ mobile/     Expo (SDK 54) + expo-router
+│  ├─ api/                  Express API server (port 3001)
+│  │  └─ src/
+│  │     ├─ routes/         chatbot, translation, clinics, appointments,
+│  │     │                  interpreter, insurance, community, health record, auth
+│  │     ├─ middlewares/    session authentication
+│  │     └─ lib/            OpenAI client, OIDC auth, logger
+│  ├─ web/                  React + Vite web app (port 5173)
+│  │  └─ src/
+│  │     ├─ pages/          one file per screen
+│  │     └─ components/     layout, shared UI, shadcn/ui components
+│  └─ mobile/               Expo app
+│     └─ app/(tabs)/        Home, AI Chat, Clinics, Translate, Community, Health
 ├─ packages/
-│  ├─ db/                   Drizzle ORM 스키마 + 시드 (PostgreSQL)
-│  ├─ api-zod/              서버용 zod 스키마        ← 원본에 없어서 새로 작성
-│  ├─ api-client-react/     React Query 훅 + 타입    ← 원본에 없어서 새로 작성
-│  └─ replit-auth-web/      웹 로그인 훅(useAuth)     ← 원본에 없어서 새로 작성
-├─ .vscode/      추천 확장, 태스크, 디버그 설정
-├─ api.http       REST Client로 API 테스트
-└─ .env.example
+│  ├─ db/                   Drizzle schema, DB client, seed data
+│  ├─ api-zod/              shared zod schemas and types for the API
+│  ├─ api-client-react/     React Query hooks for calling the API
+│  └─ replit-auth-web/      useAuth hook for the web app
+├─ .vscode/                 editor settings, tasks, debug config
+├─ api.http                 sample API requests
+├─ .env.example             environment variable template
+├─ package.json             workspace scripts
+└─ pnpm-workspace.yaml
 ```
 
-## 처음 한 번 설정
+## License
 
-1. **필요한 것**: Node.js 20.19+ (22 권장), pnpm, PostgreSQL
-   ```powershell
-   corepack enable          # pnpm 활성화 (또는 npm i -g pnpm)
-   # 전역 설치 없이 쓰려면 모든 pnpm 명령 앞에 `npx pnpm@10.15.0` 을 붙여도 됩니다
-   ```
-   Postgres는 로컬 설치, Docker, 또는 Supabase/Neon 무료 DB 중 편한 걸 쓰세요.
-2. **환경변수**: `.env.example`을 `.env`로 복사해서 값 채우기
-   (`DATABASE_URL`, `OPENAI_API_KEY`, `GOOGLE_CLIENT_ID/SECRET`)
-   모바일은 `apps/mobile/.env.example` → `apps/mobile/.env`
-3. **설치**
-   ```powershell
-   pnpm install
-   cd apps/mobile; pnpm fix-deps; cd ../..   # Expo 패키지 버전 자동 정렬
-   ```
-4. **DB 테이블 만들기**
-   ```powershell
-   pnpm db:push
-   ```
-   (서버를 처음 켜면 병원·커뮤니티 시드 데이터가 자동으로 들어갑니다)
-5. **Google 로그인**: Google Cloud Console → API 및 서비스 → 사용자 인증 정보 →
-   OAuth 클라이언트 ID(웹) → 승인된 리디렉션 URI에 `http://localhost:5173/api/callback` 추가
-
-## 실행
-
-| 무엇 | 명령 | VS Code |
-|---|---|---|
-| API + 웹 같이 | `pnpm dev` | 태스크 **Dev: API + Web** |
-| API만 | `pnpm dev:api` | 디버그 **API: debug (tsx)** (브레이크포인트 가능) |
-| 웹만 | `pnpm dev:web` → http://localhost:5173 | 태스크 **Web: dev** |
-| 모바일 | `pnpm dev:mobile` → Expo Go로 QR 스캔 | 태스크 **Mobile: Expo start** |
-| 타입 검사 | `pnpm typecheck` | 태스크 **Typecheck all** |
-
-VS Code에서 태스크 실행: `Ctrl+Shift+P` → **Tasks: Run Task**.
-휴대폰에서 테스트할 때는 `apps/mobile/.env`의 `EXPO_PUBLIC_API_URL`을 PC의 LAN IP(예: `http://192.168.0.10:3001`)로 바꾸세요.
-
-## Replit 버전과 달라진 점
-
-- 빠져 있던 `api-zod`, `api-client-react`, `replit-auth-web`, 모바일 `constants/colors.ts`, 웹 로고 이미지를 새로 만들었습니다.
-- `apps/api/src/lib/openai.ts`: `OPENAI_API_KEY`도 쓸 수 있게 (기존 `AI_INTEGRATIONS_*`도 그대로 지원)
-- `apps/api/src/app.ts`: CORS를 `WEB_ORIGIN` 허용 목록으로 제한, JSON 본문 제한을 15MB로 (사진 번역용)
-- `apps/mobile/app/_layout.tsx`: `EXPO_PUBLIC_API_URL`로 서버 주소 지정
-- 타입 오류 수정: 보험 화면에서 `Info` 아이콘 import 누락(계산 결과 표시 시 화면이 깨지던 버그), 가이드 데이터 타입 지정, 예약 목록 변수 타입 지정
-- 웹 로고 파일 이름 정리: `image_1774266704055.png` → `healix-logo.png`
-- 나머지 화면·라우트 코드는 원본 그대로입니다.
-
-## 알려진 문제 (다음 작업)
-
-- [ ] `OPENAI_API_KEY`가 없으면 서버 전체가 시작되지 않음 → AI 기능만 꺼지도록 변경
-
-- [ ] 통역 예약 수정·취소·확정 API에 로그인/본인 확인이 없음 (IDOR)
-- [ ] AI 엔드포인트(`/chatbot`, `/translate`, `/translate/doc`, `/clinics/recommend`) 인증·사용량 제한 없음
-- [ ] 챗봇 `conversationHistory` role 검증, 프롬프트 인젝션 대비
-- [ ] `PUT /health-record` 입력 필드 화이트리스트(zod) 적용
-- [ ] 모바일 로그인 화면 없음 → 건강기록 탭 401
-- [ ] 모바일 음성 입력이 가짜(placeholder)
-- [ ] 병원 예약 중복 방지, 예약 취소·수정 API
-- [ ] 병원·커뮤니티 검색을 DB 쿼리로 (현재 전체 조회 후 JS 필터)
-- [ ] 보험 본인부담률을 건강보험공단 기준으로 검증
+No license has been chosen for this project yet. Until a `LICENSE` file is added,
+all rights are reserved by the Healix team (ASVF 2026, Team 1).
