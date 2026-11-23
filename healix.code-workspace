@@ -1,0 +1,12 @@
+{
+  "folders": [
+    { "name": "🏠 healix (root)", "path": "." },
+    { "name": "api", "path": "apps/api" },
+    { "name": "web", "path": "apps/web" },
+    { "name": "mobile", "path": "apps/mobile" },
+    { "name": "db", "path": "packages/db" }
+  ],
+  "settings": {
+    "typescript.tsdk": "node_modules/typescript/lib"
+  }
+}

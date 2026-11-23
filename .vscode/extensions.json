@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "expo.vscode-expo-tools",
+    "msjsdiag.vscode-react-native",
+    "mikestead.dotenv",
+    "yoavbls.pretty-ts-errors",
+    "humao.rest-client"
+  ]
+}

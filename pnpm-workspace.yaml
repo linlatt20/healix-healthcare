@@ -1,0 +1,6 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# React Native / Expo는 hoisted node_modules가 필요합니다 (pnpm 10+)
+nodeLinker: hoisted

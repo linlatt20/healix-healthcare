@@ -1,0 +1,20 @@
+{
+  "name": "healix",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Healix — multilingual healthcare companion for foreigners in Korea",
+  "packageManager": "pnpm@10.15.0",
+  "engines": { "node": ">=20.19" },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @workspace/api --filter @workspace/web dev",
+    "dev:api": "pnpm --filter @workspace/api dev",
+    "dev:web": "pnpm --filter @workspace/web dev",
+    "dev:mobile": "pnpm --filter @workspace/mobile start",
+    "db:push": "pnpm --filter @workspace/db push",
+    "db:studio": "pnpm --filter @workspace/db studio",
+    "typecheck": "pnpm -r --if-present typecheck"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3"
+  }
+}

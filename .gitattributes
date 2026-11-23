@@ -1,0 +1,5 @@
+# Windows/Mac/Linux 간 줄바꿈(CRLF/LF) 차이로 diff가 지저분해지는 것 방지
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

@@ -1,0 +1,26 @@
+### VS Code "REST Client" 확장으로 API를 바로 테스트할 수 있습니다 (Send Request 클릭)
+@api = http://localhost:3001/api
+
+### 서버 상태
+GET {{api}}/healthz
+
+### 병원 검색
+GET {{api}}/clinics?department=Internal
+
+### 보험 본인부담 계산
+POST {{api}}/insurance/calculate
+Content-Type: application/json
+
+{ "insuranceType": "nhis_employed", "visitType": "clinic", "totalCost": 50000 }
+
+### 의료 번역 (OpenAI 키 필요)
+POST {{api}}/translate
+Content-Type: application/json
+
+{ "text": "I have had a fever and sore throat for three days.", "targetLanguage": "Korean" }
+
+### 챗봇
+POST {{api}}/chatbot
+Content-Type: application/json
+
+{ "message": "I have a headache and dizziness since this morning", "language": "English" }
