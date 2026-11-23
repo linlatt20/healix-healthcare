@@ -44,6 +44,9 @@ importers:
       pino-http:
         specifier: ^10.5.0
         version: 10.5.0
+      tsx:
+        specifier: ^4.20.5
+        version: 4.23.15
     devDependencies:
       '@types/cookie-parser':
         specifier: ^1.4.9
@@ -60,9 +63,6 @@ importers:
       pino-pretty:
         specifier: ^13.1.1
         version: 13.2.0
-      tsx:
-        specifier: ^4.20.5
-        version: 4.23.15
 
   apps/mobile:
     dependencies:

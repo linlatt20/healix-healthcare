@@ -12,6 +12,8 @@ community of people in the same situation.
 Built by Team 1 for **ASVF 2026**. The project includes a web app, an iOS/Android
 app and a shared API server.
 
+**Live demo:** _coming soon_
+
 ## Features
 
 - **AI health chatbot**: describe symptoms in your own language and get guidance on what kind of care you may need and which department to visit.
@@ -105,6 +107,27 @@ computer's LAN IP (e.g. `http://192.168.0.10:3001`).
 **VS Code users:** the `.vscode/` folder includes recommended extensions, tasks
 (*Ctrl+Shift+P → Tasks: Run Task*) and a debug configuration for the API.
 `api.http` lets you try the API with the REST Client extension.
+
+### 5. Deploy (Render + Neon)
+
+In production the API server also serves the built web app, so the whole site
+runs as a single service at one URL.
+
+1. Create a free PostgreSQL database on [Neon](https://neon.tech) and copy its connection string.
+2. Create the tables in it from your computer:
+   ```bash
+   DATABASE_URL="<neon-connection-string>" pnpm db:push
+   # PowerShell: $env:DATABASE_URL="<neon-connection-string>"; pnpm db:push
+   ```
+3. On [Render](https://render.com), choose **New → Blueprint** and select this repository.
+   `render.yaml` sets up the service. Enter `DATABASE_URL`, `OPENAI_API_KEY`,
+   `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` when prompted.
+4. After the first deploy, add `https://<your-service>.onrender.com/api/callback`
+   as an authorized redirect URI of your Google OAuth client.
+
+Manual equivalent: build with `pnpm install --prod=false && pnpm build`, start with
+`pnpm start` and set `NODE_ENV=production`. Free Render services sleep when idle,
+so the first request after a while can take about a minute.
 
 ## Project Structure
 
